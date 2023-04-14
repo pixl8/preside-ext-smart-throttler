@@ -1,0 +1,31 @@
+{
+    "name":"PresideCMS Extension: Smart Throttler",
+    "type":"preside-extensions",
+    "version":"$VERSION_NUMBER",
+    "location":"$DOWNLOAD_URL",
+    "private":false,
+    "author":"Pixl8 Group Ltd",
+    "directory":"application/extensions",
+    "repository":{
+        "type":"git",
+        "URL":"https://github.com/pixl8/preside-ext-smart-throttler"
+    },
+    "slug":"preside-ext-smart-throttler",
+    "projectURL":"https://github.com/pixl8/preside-ext-smart-throttler",
+    "ignore":[
+        ".git/*",
+        ".gitignore",
+        ".github/*",
+        ".twgit_features_subject",
+        "tests"
+    ],
+    "devDependencies":{
+        "testbox":"2.4.0+80"
+    },
+    "installPaths":{
+        "testbox":"tests/testbox/"
+    },
+    "testbox":{
+        "runner":"http://127.0.0.1:5935/runtests.cfm"
+    }
+}

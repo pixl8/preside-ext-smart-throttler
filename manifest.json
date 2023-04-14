@@ -1,0 +1,7 @@
+{
+	  "id"        : "preside-ext-smart-throttler"
+	, "title"     : "Smart Throttler"
+	, "author"    : "Pixl8 Group Ltd"
+	, "version"   : "$VERSION_NUMBER"
+	, "dependsOn" : []
+}
