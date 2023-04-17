@@ -20,9 +20,14 @@ Configuration of the extension can provided either through environment variables
 * `failureStatusCode`: Status code to use when either the queue is full, or requests timeout. Default is `503`.
 * `sleepInterval`: How long queued threads sleep for before checking their status again (in ms). Default is `50`.
 * `skipPaths`: An array of URL paths that can bypass the queue entirely. These are matched with a "startsWith" pattern so an incoming `/api/v2/events/` request matches an `/api/` path
+* `skipAgents`: An array of regular expressions for user agents that can bypass the queue entirely.
 * `priorityPaths`: An array of URL paths that will be placed in the priority queue and processed before "standard" requests. These are matched with a "startsWith" pattern so an incoming `/api/v2/events/` request matches an `/api/` path
+* `priorityAgents`: An array of regular expressions for user agents will be placed in the priority queue and processed before "standard" requests.
+* `failPaths`: An array of URL paths that will be immediately failed while max concurrent requests is reached. These are matched with a "startsWith" pattern so an incoming `/api/v2/events/` request matches an `/api/` path
+* `failAgents`: An array of regular expressions for user agents that will be immediately failed while max concurrent requests is reached.
 * `prioritiseUsers`: Boolean, whether or not to put logged in user requests into the priority queue. Default is `true`.
 * `prioritiseAdmins`: Boolean, whether or not to put logged in admin user requests into the priority queue. Default is `false`.
+* `failStatelessReqs`: Boolean, whether or not to fail stateless requests while max concurrent requests is exceeded. Default is `false`.
 
 ### Using environment variables
 
@@ -34,9 +39,14 @@ The following environment variables can be set to control the configuration opti
 * `SMARTTHROTTLER_FAILURE_STATUS_CODE`
 * `SMARTTHROTTLER_SLEEP_INTERVAL`
 * `SMARTTHROTTLER_SKIP_PATHS` (use a string list of paths, e.g. "/alive,/metrics")
+* `SMARTTHROTTLER_SKIP_AGENTS` (use a string list of agents, e.g. "^Uptime robot$,apiclient")
 * `SMARTTHROTTLER_PRIORITY_PATHS` (use a string list of paths, e.g. "/api,/login")
+* `SMARTTHROTTLER_PRIORITY_AGENTS` (use a string list of paths, e.g. "^Uptime robot$,apiclient")
+* `SMARTTHROTTLER_FAIL_PATHS` (use a string list of paths, e.g. "/somepath,/anotherpath")
+* `SMARTTHROTTLER_FAIL_AGENTS` (use a string list of paths, e.g. "\bbot\b,semver")
 * `SMARTTHROTTLER_PRIORITISE_USERS`
 * `SMARTTHROTTLER_PRIORITISE_ADMINS`
+* `SMARTTHROTTLER_FAIL_STATELESSREQS`
 
 See [Configuring Preside](https://docs.preside.org/devguides/config.html#injecting-environment-variables) page in Preside docs for a guide to injecting environment variables.
 
@@ -48,10 +58,15 @@ settings.smartThrottler.queueSize         = 100;
 settings.smartThrottler.queueTimeout      = 50;
 settings.smartThrottler.failureStatusCode = 503;
 settings.smartThrottler.sleepInterval     = 20;
-settings.smartThrottler.skipPaths         = [ "/alive", "/metrics" ]; // must be an array
-settings.smartThrottler.priorityPaths     = [ "/login/", "/admin/" ]; // must be an array
+settings.smartThrottler.skipPaths         = [ "/alive", "/metrics" ];
+settings.smartThrottler.skipAgents        = [ "Uptime robot"       ];
+settings.smartThrottler.priorityPaths     = [ "/login/", "/admin/" ];
+settings.smartThrottler.priorityAgents    = [ "^APIClient04$"      ];
+settings.smartThrottler.failPaths         = [ "/somepath/"         ];
+settings.smartThrottler.failAgents        = [ "\bbot\b", "semrush" ];
 settings.smartThrottler.prioritiseUsers   = true;
 settings.smartThrottler.prioritiseAdmins  = false;
+settings.smartThrottler.failStatelessReqs = false;
 ```
 
 ## Versioning
