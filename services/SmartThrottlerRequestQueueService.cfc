@@ -7,6 +7,7 @@ component accessors=true {
 	this.CLASSIFICATION_SKIP_QUEUE = 0;
 	this.CLASSIFICATION_PRIORITY   = 1;
 	this.CLASSIFICATION_STANDARD   = 2;
+	this.CLASSIFICATION_FAIL       = 3;
 
 	property name="maxActiveRequests" type="numeric" inject="coldbox:setting:smartThrottler.maxActiveRequests";
 	property name="queueSize"         type="numeric" inject="coldbox:setting:smartThrottler.queueSize";
@@ -14,9 +15,14 @@ component accessors=true {
 	property name="failureStatusCode" type="numeric" inject="coldbox:setting:smartThrottler.failureStatusCode";
 	property name="sleepInterval"     type="numeric" inject="coldbox:setting:smartThrottler.sleepInterval";
 	property name="skipPaths"         type="array"   inject="coldbox:setting:smartThrottler.skipPaths";
+	property name="skipAgents"        type="array"   inject="coldbox:setting:smartThrottler.skipAgents";
 	property name="priorityPaths"     type="array"   inject="coldbox:setting:smartThrottler.priorityPaths";
+	property name="priorityAgents"    type="array"   inject="coldbox:setting:smartThrottler.priorityAgents";
+	property name="failPaths"         type="array"   inject="coldbox:setting:smartThrottler.failPaths";
+	property name="failAgents"        type="array"   inject="coldbox:setting:smartThrottler.failAgents";
 	property name="prioritiseUsers"   type="boolean" inject="coldbox:setting:smartThrottler.prioritiseUsers";
 	property name="prioritiseAdmins"  type="boolean" inject="coldbox:setting:smartThrottler.prioritiseAdmins";
+	property name="failStatelessReqs" type="boolean" inject="coldbox:setting:smartThrottler.failStatelessReqs";
 
 	property name="router" inject="delayedInjector:router@coldbox";
 
@@ -42,6 +48,10 @@ component accessors=true {
 		};
 		if ( r.class == this.CLASSIFICATION_SKIP_QUEUE ) {
 			return;
+		}
+
+		if ( r.class == this.CLASSIFICATION_FAIL ) {
+			fail();
 		}
 
 		insertRequestInQueue( r );
@@ -126,11 +136,36 @@ component accessors=true {
 
 	public numeric function classifyRequest() {
 		var requestPath = request[ "preside.path_info" ] ?: router.pathInfoProvider( event=$getRequestContext() );
+		var agent       = cgi.HTTP_USER_AGENT ?: "";
 
 		for( var skipPath in getSkipPaths() ) {
 			if ( Left( requestPath, Len( skipPath ) ) == skipPath ) {
 				return this.CLASSIFICATION_SKIP_QUEUE;
 			}
+		}
+		for( var skipAgent in getSkipAgents() ) {
+			if ( ReFindNoCase( skipAgent, agent ) ) {
+				return this.CLASSIFICATION_SKIP_QUEUE;
+			}
+		}
+
+		for( var failPath in getFailPaths() ) {
+			if ( Left( requestPath, Len( failPath ) ) == failPath ) {
+				return this.CLASSIFICATION_FAIL;
+			}
+		}
+		for( var failAgent in getFailAgents() ) {
+			if ( ReFindNoCase( failAgent, agent ) ) {
+				return this.CLASSIFICATION_FAIL;
+			}
+		}
+
+		if ( getFailStatelessReqs() && isStatelessRequest() ) {
+			return this.CLASSIFICATION_FAIL;
+		}
+
+		if ( getPrioritiseUsers() && $isWebsiteUserLoggedIn() || getPrioritiseAdmins() && $isAdminUserLoggedIn() ) {
+			return this.CLASSIFICATION_PRIORITY;
 		}
 
 		for( var priorityPath in getPriorityPaths() ) {
@@ -138,9 +173,10 @@ component accessors=true {
 				return this.CLASSIFICATION_PRIORITY;
 			}
 		}
-
-		if ( getPrioritiseUsers() && $isWebsiteUserLoggedIn() || getPrioritiseAdmins() && $isAdminUserLoggedIn() ) {
-			return this.CLASSIFICATION_PRIORITY;
+		for( var priorityAgent in getPriorityAgents() ) {
+			if ( ReFindNoCase( priorityAgent, agent ) ) {
+				return this.CLASSIFICATION_PRIORITY;
+			}
 		}
 
 		return this.CLASSIFICATION_STANDARD;
@@ -165,6 +201,10 @@ component accessors=true {
 			, maxActiveRequests = getMaxActiveRequests()
 			, maxQueueSize      = getQueueSize()
 		};
+	}
+
+	public boolean function isStatelessRequest() {
+		!Len( Trim( cgi.HTTP_REFERER ?: "" ) ) && StructIsEmpty( cookies );
 	}
 
 }
