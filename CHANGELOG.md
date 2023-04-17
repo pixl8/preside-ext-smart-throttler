@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+* Add a debug header for queue priority classification for your request
+
 ## 0.2.0
 
 * Added concept of immediate fail conditions. i.e. when exceeding max concurrent active requests, immediately fail requests under the matching conditions.

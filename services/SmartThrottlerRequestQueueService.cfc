@@ -64,6 +64,7 @@ component accessors=true {
 		} while( !r.released && !r.failed );
 
 		$getRequestContext().setHTTPHeader( name="X-Preside-Queued-For", value=GetTickCount()-r.started );
+		$getRequestContext().setHTTPHeader( name="X-Preside-Queued-Prio", value=r.class );
 
 		if ( r.failed ) {
 			fail();
