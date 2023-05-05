@@ -205,7 +205,7 @@ component accessors=true {
 	}
 
 	public boolean function isStatelessRequest() {
-		!Len( Trim( cgi.HTTP_REFERER ?: "" ) ) && StructIsEmpty( cookies );
+		return !Len( Trim( cgi.HTTP_REFERER ?: "" ) ) && StructIsEmpty( cookies );
 	}
 
 }

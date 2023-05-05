@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+* Add missing “return” keyword to isStatelessRequest()
+
 ## 0.2.1
 
 * Add a debug header for queue priority classification for your request
